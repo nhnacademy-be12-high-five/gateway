@@ -9,5 +9,5 @@ WORKDIR /app
 # (이름을 'app.jar'로 통일하면 실행하기 편합니다)
 COPY target/*.jar app.jar
 
-# 4. 컨테이너가 시작될 때 이 명령어를 실행
+# 4. 컨테이너가 시작될 때 이 명령어를 실행행?
 CMD ["java", "-jar", "app.jar"]
