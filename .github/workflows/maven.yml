@@ -19,7 +19,7 @@ on:
 jobs:
   call-reusable-deploy:
     # 1. .github 레포의 템플릿 파일을 호출
-    # 'YOUR-ORGANIZATION' 부분은 실제 조직 이름으로 변경해야 합니다.
+    # 'YOUR-ORGANIZATION' 부분은 실제 조직 이름으로 변경해야 합니다.후
     uses: nhnacademy-be12-high-five/.github/.github/workflows/shared-workflow.yml@main
 
     # 2. 템플릿에 필요한 '입력값(inputs)'을 전달
