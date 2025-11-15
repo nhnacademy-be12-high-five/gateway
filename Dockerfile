@@ -1,6 +1,6 @@
 # 각자 프로젝트 루트 파일
 # 1. JDK 21이 포함된 베이스 이미지 사용
-FROM openjdk:21-slim
+FROM openjdk:21-jre-slim
 
 # 2. 작업 디렉토리 설정
 WORKDIR /app

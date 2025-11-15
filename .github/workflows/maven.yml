@@ -26,8 +26,6 @@ jobs:
     with:
       service-name: 'gateway-server'
       deploy-path: '~/www/nhnbook'
-      jar-name: 'nhnbook.jar'
-      run-port: '10481'
 
     # 3. 템플릿에 필요한 '시크릿'을 전달
     # 'secrets: inherit'를 쓰면 이 레포의 시크릿을 모두 넘깁니다.
