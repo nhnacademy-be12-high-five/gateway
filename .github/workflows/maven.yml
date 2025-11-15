@@ -9,7 +9,7 @@
 # 각 서비스 워크 플로우
 name: Gateway CI/CD
 
-# 이 레포에 push/pr이 발생하면 실행
+# 이 레포에 push/pr이 발생하면 실행 테스트 겸
 on:
   push:
     branches: [ "main", "dev", "feature/**" ]
