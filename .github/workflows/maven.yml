@@ -1,35 +1,73 @@
-# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
-
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-name: Java CI with Maven
+name: 게이트웨이 서버 배포
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "dev" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "dev" ]
+
+env:
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  SSH_HOST: ${{ secrets.SSH_IP }}
+  SSH_USER: ${{ secrets.SSH_ID }}
+  SSH_PASSWORD: ${{ secrets.SSH_PW }}
+  SSH_PORT: ${{ secrets.SSH_PORT }}
 
 jobs:
-  build:
-
+  build-and-deploy-gateway:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
 
-    # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
-    - name: Update dependency graph
-      uses: advanced-security/maven-dependency-submission-action@571e99aab1055c2e71a1e2309b9691de18d6b7d6
+      - name: JDK 21 설정
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Maven 빌드
+        run: mvn clean package -DskipTests
+
+      - name: Docker 로그인
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Docker 이미지 빌드 및 푸시
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/gateway-server:latest
+
+      - name: SSH로 서버 배포
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            echo "🚀 게이트웨이 서버 배포 시작..."
+            cd ~/www/nhnbook
+
+            CONTAINER_NAME="team5-gateway"
+            SERVICE_NAME="gateway_server"
+
+            echo "🛑 기존 컨테이너 중지..."
+            docker stop $CONTAINER_NAME || true
+            docker rm $CONTAINER_NAME || true
+
+            echo "📥 최신 이미지 다운로드..."
+            docker-compose pull $SERVICE_NAME
+
+            echo "🔄 컨테이너 시작..."
+            docker-compose up -d --no-deps $SERVICE_NAME
+
+            docker image prune -f
+            echo "✅ 게이트웨이 서버 배포 완료!"
