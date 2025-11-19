@@ -45,12 +45,12 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/gateway-server:latest
 
-      - name: SSH로 서버 배포
+      - name: 서버에 배포
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PASSWORD }}
+          host: ${{ secrets.SSH_IP }}
+          username: ${{ secrets.SSH_ID }}
+          password: ${{ secrets.SSH_PW }}
           port: ${{ secrets.SSH_PORT }}
           script: |
             echo "🚀 게이트웨이 서버 배포 시작..."
