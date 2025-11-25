@@ -1,73 +1,22 @@
-name: 게이트웨이 서버 배포
+name: Gateway 배포
 
 on:
   push:
-    branches: [ "main", "dev" ]
+    branches: [ "dev", "main" ]
   pull_request:
-    branches: [ "main", "dev" ]
-
-env:
-  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-  SSH_HOST: ${{ secrets.SSH_IP }}
-  SSH_USER: ${{ secrets.SSH_ID }}
-  SSH_PASSWORD: ${{ secrets.SSH_PW }}
-  SSH_PORT: ${{ secrets.SSH_PORT }}
+    branches: [ "dev", "main" ]
 
 jobs:
-  build-and-deploy-gateway:
-    runs-on: ubuntu-latest
-    steps:
-      - name: 코드 체크아웃
-        uses: actions/checkout@v4
-
-      - name: JDK 21 설정
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          cache: maven
-
-      - name: Maven 빌드
-        run: mvn clean package -DskipTests
-
-      - name: Docker 로그인
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Docker 이미지 빌드 및 푸시
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/gateway-server:latest
-
-      - name: 서버에 배포
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_IP }}
-          username: ${{ secrets.SSH_ID }}
-          password: ${{ secrets.SSH_PW }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            echo "🚀 게이트웨이 서버 배포 시작..."
-            cd ~/www/nhnbook
-
-            CONTAINER_NAME="team5-gateway"
-            SERVICE_NAME="gateway_server"
-
-            echo "🛑 기존 컨테이너 중지..."
-            docker stop $CONTAINER_NAME || true
-            docker rm $CONTAINER_NAME || true
-
-            echo "📥 최신 이미지 다운로드..."
-            docker-compose pull $SERVICE_NAME
-
-            echo "🔄 컨테이너 시작..."
-            docker-compose up -d --no-deps $SERVICE_NAME
-
-            docker image prune -f
-            echo "✅ 게이트웨이 서버 배포 완료!"
+  deploy-gateway:
+    uses: nhnacademy-be12-high-five/.github/.github/workflows/infra-workflow.yml@main
+    with:
+      service-name: gateway_server
+      container-name: team5-gateway
+      compose-file: docker-compose.yml
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      SSH_IP: ${{ secrets.SSH_IP }}
+      SSH_ID: ${{ secrets.SSH_ID }}
+      SSH_PW: ${{ secrets.SSH_PW }}
+      SSH_PORT: ${{ secrets.SSH_PORT }}

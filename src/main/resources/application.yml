@@ -2,9 +2,6 @@ spring:
   application:
     name: gateway
   
-  profiles:
-    active: dev
-  
   config:
     import: "configserver:"
   
