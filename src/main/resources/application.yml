@@ -1,6 +1,10 @@
 spring:
   application:
     name: gateway
+  cloud:
+    config:
+      discovery:
+        enabled: false
   config:
     import: "optional:configserver:http://team5-config-server:8888/"
 
