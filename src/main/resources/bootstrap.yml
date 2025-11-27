@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: gateway
+  cloud:
+    config:
+      discovery:
+        enabled: true              # 유레카를 사용해서 찾겠다!
+        service-id: team5_config_server # 유레카에 등록된 컨피그 서버 이름
+      fail-fast: true              # 설정 못 가져오면 켜지지 마라
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://team5-eureka-server:10481/eureka/
