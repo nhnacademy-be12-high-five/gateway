@@ -34,9 +34,15 @@ public class JwtUtil {
                 .getBody();
     }
 
-    public Long getUserId(String token) {
+    public Long getMemberId(String token) {
         return Long.parseLong(getClaims(token).getSubject());
     }
+
+    public String getLoginId(String token) {
+        return String.valueOf(getClaims(token).get("loginId"));
+    }
+
+    public String getRole(String token) { return String.valueOf(getClaims(token).get("role"));}
 
     public boolean validateToken(String token) {
         try {
