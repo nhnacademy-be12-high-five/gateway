@@ -9,7 +9,7 @@ spring:
       routes:
         # 1. 멤버 서비스 (Cart 요청)5
         - id: member-service
-          # [중요] Member Service의 설정 파일 이름과 똑같아야 함!
+          # [중요] Member Service의 설정 파일 이름과 똑같아야 함!!
           uri: lb://member-server
           predicates:
             # [수정됨] 프론트가 /api/cart 로 보내므로 여기도 /api/cart/** 여야 함
