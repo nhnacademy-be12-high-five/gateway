@@ -2,35 +2,42 @@ server:
   port: 8082
 
 spring:
-  application:
-    name: gateway
   cloud:
     gateway:
       routes:
-        # 1. 멤버 서비스 (Cart 요청)5
         - id: member-service
-          # [중요] Member Service의 설정 파일 이름과 똑같아야 함!!
-          uri: lb://member-server
+          uri: lb://TEAM5-MEMBER-SERVER
           predicates:
-            # [수정됨] 프론트가 /api/cart 로 보내므로 여기도 /api/cart/** 여야 함
-            - Path=/api/cart/** # [주의] Member Controller가 @GetMapping("/api/cart")라면 StripPrefix를 쓰면 안됨!
-          # 만약 Member Controller가 @GetMapping("/cart")라면 아래 주석 해제
-          filters:
-            - StripPrefix=1
+            - Path=/api/cart/**, /api/points/**, /api/admin/points/**, /internal/**
 
-        # 2. 쿠폰 서비스
         - id: coupon-service
-          uri: lb://COUPON-SERVER
+          uri: lb://TEAM5-COUPON-SERVER
           predicates:
-            - Path=/coupons/**
+            - Path=/api/coupons/**
 
-        # 3. 프론트엔드 (나머지 모든 요청)
-        - id: frontend-server
-          uri: http://localhost:8080
+        - id: book-service
+          uri: lb://TEAM5-BOOK-SERVER
           predicates:
-            - Path=/**
+            - Path=/api/books/**
+          filters:
+            - StripPrefix= 2
+
+        - id: payment-service
+          uri: lb://TEAM5-PAYMENT-SERVER
+          predicates:
+            - Path=/api/payments/**
+          filters:
+            - StripPrefix= 2
+
+        - id: order-service
+          uri: lb://TEAM5-ORDER-SERVER
+          predicates:
+            - Path=/api/orders/**
+          filters:
+            - StripPrefix= 2
+
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://localhost:8080/eureka/
