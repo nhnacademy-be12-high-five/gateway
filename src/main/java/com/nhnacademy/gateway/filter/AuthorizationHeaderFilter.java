@@ -1,6 +1,6 @@
 package com.nhnacademy.gateway.filter;
 
-import com.nhnacademy.gateway.jwt.JwtUtil; // 패키지명 확인!
+import com.nhnacademy.gateway.jwt.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -51,7 +51,7 @@ public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<Auth
             String token = authorizationHeader.replace("Bearer ", "");
 
             boolean isBlacklisted = Boolean.TRUE.equals(redisTemplate.hasKey(token));
-            log.info("Gateway 블랙리스트 검사 결과: {}", isBlacklisted); // ★ 로그 확인!
+            log.info("Gateway 블랙리스트 검사 결과: {}", isBlacklisted);
 
             if (!jwtUtil.validateToken(token)) {
                 return onError(exchange, "JWT token is not valid", HttpStatus.UNAUTHORIZED);
