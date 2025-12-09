@@ -10,8 +10,8 @@ jobs:
   deploy-gateway:
     uses: nhnacademy-be12-high-five/.github/.github/workflows/infra-workflow.yml@main
     with:
-      service-name: gateway_server
-      container-name: team5-gateway
+      service-name: team5-gateway-server
+      container-name: team5-gateway-server
       compose-file: docker-compose.yml
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
