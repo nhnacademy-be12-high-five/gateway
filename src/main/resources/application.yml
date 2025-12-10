@@ -1,7 +1,8 @@
 spring:
   application:
-    name: team5-gateway-server
+    name: TEAM5-GATEWAY-SERVER
   config:
+    name: TEAM5-GATEWAY-SERVER
     import: "optional:configserver:"
 
 # ▼ [필수 추가] 이 부분이 없으면 Docker가 주는 유레카 주소를 못 받습니다!
