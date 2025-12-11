@@ -67,7 +67,7 @@ public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<Auth
             }
 
             String memberId = String.valueOf(jwtUtil.getMemberId(token));
-            String loginId = jwtUtil.getLoginId(token);
+
             String userRole = jwtUtil.getRole(token);
 
             if (config.getRole() != null) {
@@ -78,7 +78,6 @@ public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<Auth
 
             ServerHttpRequest modifiedRequest = request.mutate()
                     .header("X-User-ID", memberId)
-                    .header("X-Login-ID", loginId)
                     .header("X-Role", userRole)
                     .build();
 
