@@ -84,7 +84,7 @@ public class AuthorizationHeaderGatewayFilterFactory extends AbstractGatewayFilt
 
             // 4. 검증 성공 시 정보 추출
             String memberId = String.valueOf(jwtUtil.getMemberId(token));
-            String loginId = jwtUtil.getLoginId(token);
+
             String userRole = jwtUtil.getRole(token);
 
             if (config.getRole() != null) {
@@ -95,7 +95,6 @@ public class AuthorizationHeaderGatewayFilterFactory extends AbstractGatewayFilt
 
             ServerHttpRequest modifiedRequest = request.mutate()
                     .header("X-User-ID", memberId)
-                    .header("X-Login-ID", loginId)
                     .header("X-Role", userRole)
                     .build();
 
