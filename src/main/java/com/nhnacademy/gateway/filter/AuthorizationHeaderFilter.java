@@ -10,18 +10,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils; // 추가됨
+import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
-public class AuthorizationHeaderGatewayFilterFactory extends AbstractGatewayFilterFactory<AuthorizationHeaderGatewayFilterFactory.Config> {
+public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<AuthorizationHeaderFilter.Config> {
 
     private final JwtUtil jwtUtil;
     private final StringRedisTemplate redisTemplate;
 
-    public AuthorizationHeaderGatewayFilterFactory(JwtUtil jwtUtil, StringRedisTemplate redisTemplate) {
+    public AuthorizationHeaderFilter(JwtUtil jwtUtil, StringRedisTemplate redisTemplate) {
         super(Config.class);
         this.jwtUtil = jwtUtil;
         this.redisTemplate = redisTemplate;
@@ -29,23 +29,13 @@ public class AuthorizationHeaderGatewayFilterFactory extends AbstractGatewayFilt
 
     public static class Config {
         private String role;
-        private boolean required = true; // [중요] 기본값 true (인증 필수)
+        private boolean required = true;
 
-        public String getRole() {
-            return role;
-        }
+        public String getRole() { return role; }
+        public void setRole(String role) { this.role = role; }
 
-        public void setRole(String role) {
-            this.role = role;
-        }
-
-        public boolean isRequired() { // [중요] getter 추가
-            return required;
-        }
-
-        public void setRequired(boolean required) { // [중요] setter 추가
-            this.required = required;
-        }
+        public boolean isRequired() { return required; }
+        public void setRequired(boolean required) { this.required = required; }
     }
 
     @Override
@@ -53,27 +43,21 @@ public class AuthorizationHeaderGatewayFilterFactory extends AbstractGatewayFilt
         return (exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
 
-            // 1. 헤더가 없는 경우 처리
             if (!request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
                 if (config.isRequired()) {
-                    // 필수(true)인데 없으면 -> 에러
                     return onError(exchange, "No authorization header", HttpStatus.UNAUTHORIZED);
                 } else {
-                    // 필수 아니면(false) -> 그냥 통과 (비회원)
                     return chain.filter(exchange);
                 }
             }
 
-            // 2. 헤더 값 가져오기
             String authorizationHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
             if (!StringUtils.hasText(authorizationHeader) || !authorizationHeader.startsWith("Bearer ")) {
-                // 헤더 형식이 이상하면 -> 에러 (required=false여도, 이상한 헤더를 보냈으면 막는게 안전)
-                return onError(exchange, "Invalid Authorization Header", HttpStatus.UNAUTHORIZED);
+                return onError(exchange, "Invalid Authorization Header Format", HttpStatus.UNAUTHORIZED);
             }
 
             String token = authorizationHeader.replace("Bearer ", "");
 
-            // 3. 토큰 검증
             if (Boolean.TRUE.equals(redisTemplate.hasKey(token))) {
                 return onError(exchange, "이미 로그아웃된 사용자입니다.", HttpStatus.UNAUTHORIZED);
             }
@@ -82,7 +66,6 @@ public class AuthorizationHeaderGatewayFilterFactory extends AbstractGatewayFilt
                 return onError(exchange, "JWT token is not valid", HttpStatus.UNAUTHORIZED);
             }
 
-            // 4. 검증 성공 시 정보 추출
             String memberId = String.valueOf(jwtUtil.getMemberId(token));
 
             String userRole = jwtUtil.getRole(token);
@@ -103,7 +86,7 @@ public class AuthorizationHeaderGatewayFilterFactory extends AbstractGatewayFilt
     }
 
     private Mono<Void> onError(ServerWebExchange exchange, String err, HttpStatus httpStatus) {
-        log.error("Gateway Filter Error: {} status: {}", err, httpStatus); // 로그 추가
+        log.error("Gateway Filter Error: {} status: {}", err, httpStatus);
         ServerHttpResponse response = exchange.getResponse();
         response.setStatusCode(httpStatus);
         return response.setComplete();
